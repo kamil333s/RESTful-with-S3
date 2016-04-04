@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  Bucket: String,
-  Key: {type: String},  
   URL: String
 });
 

@@ -210,8 +210,35 @@ app.get('/users/:user/files/:file', (req, res) => {
   // res.json({bucketName + '/' + fileName});
 });// app.get
 
-
-app.put('/files/:file', (req, res) => {
+// PUT /users/:user/files/:file           ### Update existing file with given info {"fileName": "fileOne", "content": "hello world!"}
+app.put('/users/:user/files/:file', (req, res) => {
+  // Delete current file
+  var urlArray = req.url.split('/');
+  var bucketName = urlArray[urlArray.length - 3]; 
+  var objectName = urlArray[urlArray.length - 1];  
+  var params = {Bucket: bucketName, Key: objectName /* required */ };
+  s3.deleteObject(params, function(err, data) {
+    if (err) {
+      res.json({'Error':(err, err.stack)}); // an error occurred
+    } else {
+      // Create new file with given info
+      // var urlArray = req.url.split('/');
+      // var bucketName = urlArray[urlArray.length - 2];  
+      var params = {Bucket: bucketName, Key: req.body.fileName, Body:req.body.content};
+      console.log('params: ', params);
+      s3.putObject(params, function(err, data) {
+        if (err) {
+          res.json({'Error': err});
+        } else { 
+          var newFile = new File({URL: 'https://s3.amazonzws.com/' + bucketName + '/' + params.Key});
+            newFile.save((err, user) => {
+              res.json(user);
+            });
+          // res.json('Successfully uploaded data to ' + bucketName);   
+        }// if
+      });// putObject
+    }// if 
+  });// deleteObject
 
 });
 
